@@ -28,33 +28,28 @@
     pointer-events:none; text-align:right;
     opacity:0; transform:translateY(18px);
     transition: opacity .45s ease, transform .45s ease;
-    max-width:380px;
+    max-width:440px;
   }
   [data-service-overlay].svc-visible { opacity:1; transform:translateY(0); }
-  [data-service-overlay] .svc-num {
-    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:3px;
-    text-transform:uppercase; color:#A855F7; margin:0 0 10px;
+  [data-service-overlay] .svc-num-title {
+    font-family:'Space Mono',monospace; font-size:12px; letter-spacing:3px;
+    text-transform:uppercase; color:#C084FC; margin:0 0 10px;
   }
-  [data-service-overlay] .svc-title {
+  [data-service-overlay] .svc-headline {
     font-family:'Barlow Condensed',sans-serif; font-weight:800;
-    font-size:clamp(28px,4vw,52px); line-height:.92; text-transform:uppercase;
+    font-size:clamp(32px,5vw,60px); line-height:.92; text-transform:uppercase;
     color:#fff; margin:0 0 12px; letter-spacing:-0.5px;
   }
   [data-service-overlay] .svc-desc {
-    font-family:'Barlow',sans-serif; font-size:14px; line-height:1.55;
-    color:#a1a1aa; margin:0;
-  }
-  [data-service-overlay] .svc-line {
-    display:inline-block; width:40px; height:3px; background:linear-gradient(90deg,transparent,#7C3AED,#C084FC);
-    border-radius:2px; margin:0 0 14px auto;
+    font-family:'Barlow',sans-serif; font-size:16px; line-height:1.55;
+    color:#e4e4e7; margin:0;
   }
   @media (max-width:760px){
     [data-desktopnav]{ display:none !important; }
     [data-mobilebar]{ display:flex !important; }
     [data-hero]{ height:600vh !important; }
     [data-pad]{ padding-left:20px !important; padding-right:20px !important; }
-    [data-service-overlay]{ right:20px; left:20px; top:110px; bottom:auto; max-width:none; text-align:left; text-shadow:0 2px 12px rgba(0,0,0,.8); }
-    [data-service-overlay] .svc-line { margin:0 0 14px 0; box-shadow:0 2px 8px rgba(0,0,0,.5); }
+    [data-service-overlay]{ right:20px; left:20px; top:auto; bottom:90px; max-width:none; text-align:left; text-shadow:0 2px 12px rgba(0,0,0,.8); }
   }
 </style>
 </helmet>
@@ -78,7 +73,13 @@
         431-996-5455
       </a>
     </nav>
-    <a data-mobilebar-top href="tel:+14319965455" style="display:none;"></a>
+    <div data-mobilebar style="position:fixed; bottom:0; left:0; right:0; z-index:100; display:none; flex-direction:row; height:70px;">
+      <a href="#quote" style="flex:1; display:flex; align-items:center; justify-content:center; background:#18181b; color:#fff; text-decoration:none; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase;">Free Quote</a>
+      <a href="tel:+14319965455" style="flex:1.2; display:flex; align-items:center; justify-content:center; gap:8px; background:#A855F7; color:#0a0a0c; text-decoration:none; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:24px; letter-spacing:.5px;">
+        <span style="width:6px; height:6px; border-radius:50%; background:#0a0a0c; animation:pulse 1.5s infinite;"></span>
+        431-996-5455
+      </a>
+    </div>
   </header>
 
   <!-- ===== HERO — scroll frame-scrub ===== -->
@@ -110,9 +111,8 @@
 
       <!-- service overlay (scroll-synced) -->
       <div data-service-overlay>
-        <div class="svc-line"></div>
-        <p class="svc-num" data-svc-num></p>
-        <h2 class="svc-title" data-svc-title></h2>
+        <p class="svc-num-title">[ <span data-svc-num></span> ] &nbsp;<span data-svc-title></span></p>
+        <h2 class="svc-headline" data-svc-headline></h2>
         <p class="svc-desc" data-svc-desc></p>
       </div>
 
@@ -385,21 +385,21 @@ class Component extends DCLogic {
     const svcNum = root.querySelector("[data-svc-num]");
     const svcTitle = root.querySelector("[data-svc-title]");
     const svcDesc = root.querySelector("[data-svc-desc]");
+    const svcHeadline = root.querySelector("[data-svc-headline]");
     if (!canvas || !heroSection) return;
     const ctx = canvas.getContext("2d");
 
     // ---- Service segments: frame ranges mapped to services ----
     const serviceSegments = [
-      { start:13,  end:60,  num:"01", title:"Lights &\nElectrical",   desc:"LED upgrades, halo rings, DRL installs and full electrical diagnostics." },
-      { start:61,  end:90,  num:"08", title:"Ceramic\nCoating",       desc:"Multi-year gloss and paint protection, professionally applied for a mirror finish." },
-      { start:91,  end:120, num:"07", title:"Auto\nDetailing",        desc:"Full interior and exterior detail that resets your whole car — paint correction included." },
-      { start:121, end:145, num:"04", title:"Engine &\nPerformance",  desc:"Tuning, diagnostics and oil service. We keep what's under the hood running right." },
-      { start:146, end:200, num:"01", title:"Custom\nExhaust",        desc:"Cat-back, axle-back and full custom builds tuned for flow and tone." },
-      { start:201, end:230, num:"05", title:"Lights &\nElectrical",   desc:"Headlight restoration, HID/LED conversion and wiring — we see it all." },
-      { start:231, end:260, num:"02", title:"Body &\nAero",           desc:"Spoilers, carbon fiber accents, hood scoops — bolt-on style that performs." },
+      { start:13,  end:60,  num:"01", title:"LIGHTS & ELECTRICAL", headline:"SEE AND BE SEEN",       desc:"LED upgrades, halo rings, DRL installs and full electrical diagnostics." },
+      { start:61,  end:120, num:"04", title:"DETAILING & CERAMIC", headline:"MIRROR-GLOSS, LOCKED IN", desc:"Paint correction and multi-year ceramic coating that keeps the whole car shining." },
+      { start:121, end:145, num:"05", title:"ENGINE PERFORMANCE",  headline:"POWER UNLEASHED",       desc:"Tuning, diagnostics and oil service. We keep what's under the hood running right." },
+      { start:146, end:200, num:"02", title:"CUSTOM EXHAUST",      headline:"BUILT TO BREATHE",      desc:"Cat-back, axle-back and full custom builds tuned for flow, power and tone." },
+      { start:201, end:230, num:"01", title:"LIGHTS & ELECTRICAL", headline:"SEE AND BE SEEN",       desc:"Headlight restoration, HID/LED conversion and wiring — we see it all." },
+      { start:231, end:260, num:"06", title:"BODY & AERO",         headline:"FORM MEETS FUNCTION",   desc:"Spoilers, carbon fiber accents, hood scoops — bolt-on style that performs." },
       // frames 261-349: wide car shots with plate visible — no overlay, scroll past quickly
-      { start:350, end:405, num:"07", title:"Interior\nDetailing",    desc:"Deep clean, leather conditioning, dash restoration — every surface, every seam." },
-      { start:406, end:425, num:"01", title:"Custom\nExhaust",        desc:"Quad tips, dual-exit, side-exit — we fabricate and fit the sound you want." },
+      { start:350, end:405, num:"07", title:"INTERIOR DETAILING",  headline:"PRISTINE INSIDE",       desc:"Deep clean, leather conditioning, dash restoration — every surface, every seam." },
+      { start:406, end:425, num:"02", title:"CUSTOM EXHAUST",      headline:"BUILT TO BREATHE",      desc:"Quad tips, dual-exit, side-exit — we fabricate and fit the sound you want." },
       // frames 426-478: rear views with plate visible — no overlay
     ];
     let curSvcIdx = -1;
@@ -465,8 +465,9 @@ class Component extends DCLogic {
         svcOverlay.classList.remove("svc-visible");
       } else {
         const s = serviceSegments[seg];
-        if (svcNum) svcNum.textContent = "[ " + s.num + " ]";
-        if (svcTitle) svcTitle.innerHTML = s.title.replace("\n", "<br>");
+        if (svcNum) svcNum.textContent = s.num;
+        if (svcTitle) svcTitle.textContent = s.title;
+        if (svcHeadline) svcHeadline.textContent = s.headline;
         if (svcDesc) svcDesc.textContent = s.desc;
         // Briefly remove to re-trigger transition when switching between segments
         svcOverlay.classList.remove("svc-visible");
@@ -484,9 +485,9 @@ class Component extends DCLogic {
         if (frameLabel) frameLabel.textContent = "[ FRAME " + pad(idx + 1) + " / " + N + " ]";
         updateServiceOverlay(idx + 1); // frames are 1-indexed in our map
       }
-      // overlay + cue fade with scroll
-      if (overlay) overlay.style.opacity = String(1 - smooth(0.55, 0.92, p));
-      if (cue) cue.style.opacity = String(1 - smooth(0.0, 0.08, p));
+      // overlay + cue fade out much earlier so they don't clash with the service text
+      if (overlay) overlay.style.opacity = String(1 - smooth(0.01, 0.05, p));
+      if (cue) cue.style.opacity = String(1 - smooth(0.0, 0.04, p));
       // hide the fixed stage once the hero track is scrolled past
       if (stage) {
         const past = heroSection.getBoundingClientRect().bottom <= 4;
