@@ -22,11 +22,39 @@
   @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
   @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
   [data-mobilebar] { display:none; }
+  /* ---- Service overlay ---- */
+  [data-service-overlay] {
+    position:absolute; right:32px; bottom:12%; z-index:10;
+    pointer-events:none; text-align:right;
+    opacity:0; transform:translateY(18px);
+    transition: opacity .45s ease, transform .45s ease;
+    max-width:380px;
+  }
+  [data-service-overlay].svc-visible { opacity:1; transform:translateY(0); }
+  [data-service-overlay] .svc-num {
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:3px;
+    text-transform:uppercase; color:#A855F7; margin:0 0 10px;
+  }
+  [data-service-overlay] .svc-title {
+    font-family:'Barlow Condensed',sans-serif; font-weight:800;
+    font-size:clamp(28px,4vw,52px); line-height:.92; text-transform:uppercase;
+    color:#fff; margin:0 0 12px; letter-spacing:-0.5px;
+  }
+  [data-service-overlay] .svc-desc {
+    font-family:'Barlow',sans-serif; font-size:14px; line-height:1.55;
+    color:#a1a1aa; margin:0;
+  }
+  [data-service-overlay] .svc-line {
+    display:inline-block; width:40px; height:3px; background:linear-gradient(90deg,transparent,#7C3AED,#C084FC);
+    border-radius:2px; margin:0 0 14px auto;
+  }
   @media (max-width:760px){
     [data-desktopnav]{ display:none !important; }
     [data-mobilebar]{ display:flex !important; }
     [data-hero]{ height:600vh !important; }
     [data-pad]{ padding-left:20px !important; padding-right:20px !important; }
+    [data-service-overlay]{ right:20px; left:20px; bottom:18%; max-width:none; text-align:left; }
+    [data-service-overlay] .svc-line { margin:0 0 14px 0; }
   }
 </style>
 </helmet>
@@ -78,6 +106,14 @@
           </a>
           <a href="#quote" style="display:inline-flex; align-items:center; gap:10px; padding:18px 28px; border:1px solid rgba(255,255,255,.25); color:#fff; text-decoration:none; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase;" style-hover="border-color:#A855F7; color:#C084FC;">Free quote →</a>
         </div>
+      </div>
+
+      <!-- service overlay (scroll-synced) -->
+      <div data-service-overlay>
+        <div class="svc-line"></div>
+        <p class="svc-num" data-svc-num></p>
+        <h2 class="svc-title" data-svc-title></h2>
+        <p class="svc-desc" data-svc-desc></p>
       </div>
 
       <!-- scroll cue -->
@@ -345,8 +381,28 @@ class Component extends DCLogic {
     const stage = root.querySelector("[data-herostage]");
     const cue = root.querySelector("[data-cue]");
     const frameLabel = root.querySelector("[data-scrub-frame]");
+    const svcOverlay = root.querySelector("[data-service-overlay]");
+    const svcNum = root.querySelector("[data-svc-num]");
+    const svcTitle = root.querySelector("[data-svc-title]");
+    const svcDesc = root.querySelector("[data-svc-desc]");
     if (!canvas || !heroSection) return;
     const ctx = canvas.getContext("2d");
+
+    // ---- Service segments: frame ranges mapped to services ----
+    const serviceSegments = [
+      { start:13,  end:60,  num:"01", title:"Lights &\nElectrical",   desc:"LED upgrades, halo rings, DRL installs and full electrical diagnostics." },
+      { start:61,  end:90,  num:"08", title:"Ceramic\nCoating",       desc:"Multi-year gloss and paint protection, professionally applied for a mirror finish." },
+      { start:91,  end:120, num:"07", title:"Auto\nDetailing",        desc:"Full interior and exterior detail that resets your whole car — paint correction included." },
+      { start:121, end:145, num:"04", title:"Engine &\nPerformance",  desc:"Tuning, diagnostics and oil service. We keep what's under the hood running right." },
+      { start:146, end:200, num:"01", title:"Custom\nExhaust",        desc:"Cat-back, axle-back and full custom builds tuned for flow and tone." },
+      { start:201, end:230, num:"05", title:"Lights &\nElectrical",   desc:"Headlight restoration, HID/LED conversion and wiring — we see it all." },
+      { start:231, end:260, num:"02", title:"Body &\nAero",           desc:"Spoilers, carbon fiber accents, hood scoops — bolt-on style that performs." },
+      // frames 261-349: wide car shots with plate visible — no overlay, scroll past quickly
+      { start:350, end:405, num:"07", title:"Interior\nDetailing",    desc:"Deep clean, leather conditioning, dash restoration — every surface, every seam." },
+      { start:406, end:425, num:"01", title:"Custom\nExhaust",        desc:"Quad tips, dual-exit, side-exit — we fabricate and fit the sound you want." },
+      // frames 426-478: rear views with plate visible — no overlay
+    ];
+    let curSvcIdx = -1;
 
     const N = 486;
     const pad = (n) => String(n).padStart(3, "0");
@@ -399,6 +455,25 @@ class Component extends DCLogic {
 
     const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
+    // Update service overlay based on current frame
+    const updateServiceOverlay = (frameIdx) => {
+      if (!svcOverlay) return;
+      const seg = serviceSegments.findIndex(s => frameIdx >= s.start && frameIdx <= s.end);
+      if (seg === curSvcIdx) return; // no change
+      curSvcIdx = seg;
+      if (seg < 0) {
+        svcOverlay.classList.remove("svc-visible");
+      } else {
+        const s = serviceSegments[seg];
+        if (svcNum) svcNum.textContent = "[ " + s.num + " ]";
+        if (svcTitle) svcTitle.innerHTML = s.title.replace("\n", "<br>");
+        if (svcDesc) svcDesc.textContent = s.desc;
+        // Briefly remove to re-trigger transition when switching between segments
+        svcOverlay.classList.remove("svc-visible");
+        requestAnimationFrame(() => requestAnimationFrame(() => svcOverlay.classList.add("svc-visible")));
+      }
+    };
+
     this._renderCanvas = () => {
       if (!anyLoaded) return;
       const p = this._scrubProgress();
@@ -407,6 +482,7 @@ class Component extends DCLogic {
         curIdx = idx;
         drawIndex(idx);
         if (frameLabel) frameLabel.textContent = "[ FRAME " + pad(idx + 1) + " / " + N + " ]";
+        updateServiceOverlay(idx + 1); // frames are 1-indexed in our map
       }
       // overlay + cue fade with scroll
       if (overlay) overlay.style.opacity = String(1 - smooth(0.55, 0.92, p));
