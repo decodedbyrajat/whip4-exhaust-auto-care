@@ -1,3 +1,4 @@
-dist/
-extract.mjs
+_extracted/
+Garage editorial design concept.zip
+*.zip
 node_modules/
