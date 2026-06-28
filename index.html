@@ -33,8 +33,9 @@
     [data-herohead]{ font-size:42px !important; }
     /* sections: less vertical air, full-width cards, clear the call bar */
     [data-screen-label], footer{ margin-top:9vh !important; margin-bottom:9vh !important; padding-left:22px !important; padding-right:22px !important; }
-    #visit [data-col2] > div:last-child{ min-height:300px !important; border-left:none !important; border-top:1px solid rgba(255,255,255,.08) !important; }
-    #visit [data-fade]{ padding:64px 22px !important; }
+    #visit [data-col2] > div:last-child{ min-height:280px !important; border-left:none !important; border-top:1px solid rgba(255,255,255,.08) !important; }
+    #visit [data-fade]{ padding:48px 22px !important; }
+    #quote [data-col2] > div:last-child{ margin-top:0 !important; }
     [data-below]{ padding-bottom:84px !important; }
     .split-word{ white-space:normal; }
   }
@@ -143,7 +144,7 @@
 
   <!-- ===== FREE QUOTE FORM ===== -->
   <section id="quote" data-screen-label="Free quote" data-qmarker style="position:relative; max-width:1200px; margin:16vh auto; padding:60px clamp(24px,4vw,54px); background:rgba(9,9,12,.72); backdrop-filter:blur(18px) saturate(1.15); -webkit-backdrop-filter:blur(18px) saturate(1.15); border:1px solid rgba(255,255,255,.08); border-radius:6px; box-shadow:0 40px 110px -55px rgba(0,0,0,.95);">
-    <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start;">
+    <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; flex-wrap:wrap;">
       <div data-fade>
         <p style="margin:0 0 14px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">[ No obligation ]</p>
         <h2 data-split style="margin:0 0 22px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(40px,6vw,86px); line-height:.9; text-transform:uppercase; color:#fff;">Get a free quote</h2>
@@ -205,7 +206,7 @@
 
   <!-- ===== LOCATION & HOURS ===== -->
   <section id="visit" data-screen-label="Location" style="position:relative; max-width:1200px; margin:16vh auto; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:6px; background:rgba(9,9,12,.72); backdrop-filter:blur(18px) saturate(1.15); -webkit-backdrop-filter:blur(18px) saturate(1.15); box-shadow:0 40px 110px -55px rgba(0,0,0,.95);">
-    <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; align-items:stretch;">
+    <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; align-items:stretch; flex-wrap:wrap;">
       <div data-fade style="padding:100px clamp(32px,6vw,90px);">
         <p style="margin:0 0 14px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">[ Pull up ]</p>
         <h2 data-split style="margin:0 0 40px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(40px,5.5vw,80px); line-height:.9; text-transform:uppercase; color:#fff;">Find the shop</h2>
@@ -228,9 +229,16 @@
       </div>
 
       <div style="position:relative; min-height:460px; border-left:1px solid rgba(255,255,255,.08); background:#0a0a0e;">
-        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="whip4-map" shape="rect" fit="cover" placeholder="Drop a map screenshot of 1595 Erin St" style="position:absolute; inset:0; width:100%; height:100%;" hint-size="100%,100%"></x-import>
-        <div style="position:absolute; inset:0; background:linear-gradient(180deg,rgba(5,5,7,.1),rgba(5,5,7,.45)); pointer-events:none;"></div>
-        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-100%); display:flex; flex-direction:column; align-items:center; pointer-events:none;">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2571.0!2d-97.1700!3d49.8850!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x52ea73bb8a3b0e35%3A0x7e4b2b7a2e2b2b2b!2s1595%20Erin%20St%2C%20Winnipeg%2C%20MB%20R3E%202T3!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca"
+          style="position:absolute; inset:0; width:100%; height:100%; border:0; filter:invert(90%) hue-rotate(180deg) brightness(0.85) contrast(0.9);"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="WHIP4 location — 1595 Erin Street, Winnipeg MB">
+        </iframe>
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg,rgba(5,5,7,.08),rgba(5,5,7,.32)); pointer-events:none;"></div>
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-100%); display:flex; flex-direction:column; align-items:center; pointer-events:none; z-index:2;">
           <div style="padding:7px 14px; background:#A855F7; color:#0a0a0c; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:16px; letter-spacing:.5px; white-space:nowrap;">WHIP4</div>
           <div style="width:2px; height:18px; background:#A855F7;"></div>
           <div style="width:12px; height:12px; border-radius:50%; background:#A855F7; box-shadow:0 0 18px #A855F7; margin-top:-2px;"></div>
