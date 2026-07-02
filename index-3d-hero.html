@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"}}</script>
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js';
+  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/loaders/GLTFLoader.js';
+  import { MeshoptDecoder } from 'https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/libs/meshopt_decoder.module.js';
+  import { RoomEnvironment } from 'https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/environments/RoomEnvironment.js';
+  window.__Hero3D = { THREE, GLTFLoader, MeshoptDecoder, RoomEnvironment };
+  window.dispatchEvent(new Event('hero3dready'));
+</script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#050507; }
+  ::selection { background:#A855F7; color:#fff; }
+  .split-word { display:inline-block; overflow:hidden; vertical-align:top; }
+  .split-inner { display:inline-block; will-change:transform; }
+  input::placeholder, textarea::placeholder { color:#5b5b66; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  @keyframes bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
+  [data-mobilebar] { display:none; }
+  @media (max-width:760px){
+    [data-desktopnav]{ display:none !important; }
+    [data-mobilebar]{ display:flex !important; }
+    [data-pad]{ padding-left:18px !important; padding-right:18px !important; }
+    /* collapse every two-column grid to a single column */
+    [data-col2]{ grid-template-columns:1fr !important; gap:22px !important; }
+    /* tighten hero spacing + leave room above the fixed call bar */
+    [data-hero-overlay]{ padding:120px 18px 14vh !important; }
+    [data-herohead]{ font-size:42px !important; }
+    /* sections: less vertical air, full-width cards, clear the call bar */
+    [data-screen-label], footer{ margin-top:9vh !important; margin-bottom:9vh !important; padding-left:22px !important; padding-right:22px !important; }
+    #visit [data-col2] > div:last-child{ min-height:280px !important; border-left:none !important; border-top:1px solid rgba(255,255,255,.08) !important; }
+    #visit [data-fade]{ padding:48px 22px !important; }
+    #quote [data-col2] > div:last-child{ margin-top:0 !important; }
+    [data-below]{ padding-bottom:84px !important; }
+    .split-word{ white-space:normal; }
+  }
+  @media (max-width:420px){
+    [data-herohead]{ font-size:36px !important; }
+    [data-beat] h2{ font-size:34px !important; }
+  }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="background:transparent; color:#f4f4f5; font-family:'Barlow', sans-serif; overflow-x:hidden; position:relative;">
+
+  <!-- ===== STICKY HEADER ===== -->
+  <header data-header style="position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:16px 32px; border-bottom:1px solid rgba(255,255,255,0); transition:background .35s ease, border-color .35s ease, padding .35s ease;">
+    <a href="#top" style="display:flex; align-items:center; text-decoration:none;">
+      <span style="position:relative; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-style:italic; font-size:30px; line-height:.8; letter-spacing:-1px;">
+        <span style="color:#fff;">WHIP</span><span style="color:#A855F7;">4</span>
+        <span style="position:absolute; left:-7px; right:9px; bottom:-3px; height:3px; background:linear-gradient(90deg,transparent,#7C3AED 45%,#C084FC); border-radius:2px;"></span>
+      </span>
+    </a>
+    <nav data-desktopnav style="display:flex; align-items:center; gap:26px;">
+      <a href="#services" style="color:#b8b8c0; text-decoration:none; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; font-family:'Space Mono',monospace;">Services</a>
+      <a href="#mobile" style="color:#b8b8c0; text-decoration:none; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; font-family:'Space Mono',monospace;">Mobile</a>
+      <a href="#quote" style="color:#b8b8c0; text-decoration:none; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; font-family:'Space Mono',monospace;">Quote</a>
+      <a href="#visit" style="color:#b8b8c0; text-decoration:none; font-size:12px; letter-spacing:1.5px; text-transform:uppercase; font-family:'Space Mono',monospace;">Visit</a>
+      <a href="tel:+14319965455" style="display:inline-flex; align-items:center; gap:10px; padding:11px 20px; background:#A855F7; color:#0a0a0c; text-decoration:none; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:20px; letter-spacing:.5px;" style-hover="background:#C084FC;">
+        <span style="width:7px; height:7px; border-radius:50%; background:#0a0a0c; animation:pulse 1.5s infinite;"></span>
+        431-996-5455
+      </a>
+    </nav>
+    <a data-mobilebar-top href="tel:+14319965455" style="display:none;"></a>
+  </header>
+
+  <!-- ===== FIXED 3D CAR STAGE (live WebGL, scrubs across the whole site) ===== -->
+  <div data-herostage style="position:fixed; inset:0; z-index:0; overflow:hidden; background:#050507;">
+    <canvas data-three-hero style="position:absolute; inset:0; width:100%; height:100%; display:block;"></canvas>
+    <div style="position:absolute; inset:0; background:radial-gradient(130% 80% at 50% 42%, transparent 44%, rgba(5,5,7,.74)); pointer-events:none;"></div>
+    <div style="position:absolute; inset:0; background:radial-gradient(85% 60% at 80% 26%, rgba(168,85,247,.10), transparent 60%); pointer-events:none;"></div>
+    <!-- service captions that ride the matching camera beats -->
+    <div data-captions style="position:absolute; left:0; right:0; bottom:15vh; height:0; pointer-events:none; transition:opacity .4s ease;">
+      <sc-for list="{{ captions }}" as="cap" hint-placeholder-count="6">
+        <div data-beat style="position:absolute; left:0; right:0; bottom:0; padding:0 clamp(24px,5vw,68px); opacity:0; transform:translateY(22px); transition:opacity .6s ease, transform .6s ease; will-change:opacity,transform;">
+          <p style="margin:0 0 12px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">{{ cap.kicker }}</p>
+          <h2 style="margin:0; max-width:18ch; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(40px,6vw,92px); line-height:.92; letter-spacing:-1px; text-transform:uppercase; color:#fff; text-shadow:0 6px 34px rgba(0,0,0,.7);">{{ cap.title }}</h2>
+          <p style="margin:16px 0 0; max-width:44ch; font-size:16px; line-height:1.55; color:#e6e6ec; text-shadow:0 2px 16px rgba(0,0,0,.8);">{{ cap.desc }}</p>
+        </div>
+      </sc-for>
+    </div>
+    <div data-hero-loader style="position:absolute; inset:0; z-index:5; display:flex; align-items:center; justify-content:center; background:#050507; transition:opacity .7s ease;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-style:italic; font-size:34px; letter-spacing:-1px;"><span style="color:#fff;">WHIP</span><span style="color:#A855F7;">4</span></span>
+        <div data-hero-loader-text style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:3px; color:#8b8b92;">LOADING 3D MODEL — 0%</div>
+      </div>
+    </div>
+    <div style="position:absolute; bottom:16px; right:22px; display:flex; align-items:center; gap:8px; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:#6b6b76;">
+      <span style="width:6px; height:6px; border-radius:50%; background:#A855F7; animation:pulse 1.5s infinite;"></span>
+      LIVE 3D
+    </div>
+  </div>
+
+  <!-- ===== HERO INTRO (scrolls over the car) ===== -->
+  <section id="top" data-hero data-screen-label="Hero" style="position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; justify-content:flex-end;">
+    <div data-hero-overlay data-pad style="padding:130px 32px 9vh; background:linear-gradient(0deg, rgba(5,5,7,.86) 0%, rgba(5,5,7,.4) 45%, rgba(5,5,7,0) 100%);">
+      <p data-fade style="margin:0 0 14px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">One stop. Complete car care.</p>
+      <h1 data-split data-herohead style="margin:0; max-width:20ch; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(46px,6.6vw,108px); line-height:.92; letter-spacing:-1px; text-transform:uppercase; color:#fff;">Built for the ones who feel it</h1>
+      <p data-fade style="margin:20px 0 26px; max-width:42ch; font-size:16px; line-height:1.55; color:#d4d4dd;">Custom exhaust, performance and honest service — driven by passion, delivered with care.</p>
+      <div data-fade style="display:flex; flex-wrap:wrap; gap:14px; align-items:center;">
+        <a href="tel:+14319965455" style="display:inline-flex; align-items:center; gap:14px; padding:18px 30px; background:#A855F7; color:#0a0a0c; text-decoration:none; box-shadow:0 0 44px rgba(168,85,247,.45);" style-hover="background:#C084FC;">
+          <span style="width:10px; height:10px; border-radius:50%; background:#0a0a0c; animation:pulse 1.5s infinite;"></span>
+          <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase;">Tap to call</span>
+          <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:30px; letter-spacing:.5px;">431-996-5455</span>
+        </a>
+        <a href="#quote" style="display:inline-flex; align-items:center; gap:10px; padding:18px 28px; border:1px solid rgba(255,255,255,.3); color:#fff; text-decoration:none; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase; background:rgba(5,5,7,.3);" style-hover="border-color:#A855F7; color:#C084FC;">Free quote →</a>
+      </div>
+    </div>
+    <div data-cue style="position:absolute; left:50%; bottom:22px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:2px; color:#a1a1aa;">
+      <span>SCROLL</span>
+      <span style="animation:bob 1.6s ease-in-out infinite;">↓</span>
+    </div>
+  </section>
+
+  <!-- ===== BELOW-HERO CONTENT (rises over the fixed hero stage) ===== -->
+  <div data-below style="position:relative; z-index:1; background:transparent; padding:0 16px;">
+
+  <!-- ===== SERVICES REEL — captions ride the car frames in the fixed stage ===== -->
+  <section id="services" data-screen-label="Services" style="position:relative; z-index:1; height:480vh;"></section>
+
+  <!-- ===== MOBILE SERVICES CALLOUT ===== -->
+  <section id="mobile" data-screen-label="Mobile services" style="position:relative; max-width:1200px; margin:16vh auto; padding:60px clamp(24px,4vw,54px); background:rgba(13,9,17,.72); backdrop-filter:blur(18px) saturate(1.15); -webkit-backdrop-filter:blur(18px) saturate(1.15); border:1px solid rgba(168,85,247,.22); border-radius:6px; overflow:hidden; box-shadow:0 40px 110px -55px rgba(0,0,0,.95);">
+    <div style="position:absolute; right:-10%; top:-30%; width:60%; height:160%; background:radial-gradient(circle, rgba(168,85,247,.12), transparent 60%); pointer-events:none;"></div>
+    <div style="position:relative; max-width:1340px; margin:0 auto;">
+      <div data-fade style="max-width:680px; margin-bottom:50px;">
+        <p style="margin:0 0 14px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">[ We come to you ]</p>
+        <h2 data-split style="margin:0 0 16px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(38px,6vw,82px); line-height:.9; text-transform:uppercase; color:#fff;">Can't make it in? We'll come to you.</h2>
+        <p style="margin:0; font-size:16px; line-height:1.6; color:#b8b8c0;">Doorstep service across Winnipeg — book it by phone and we handle the rest.</p>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:16px;">
+        <sc-for list="{{ mobileServices }}" as="m" hint-placeholder-count="3">
+          <div data-fade style="padding:32px 28px; background:linear-gradient(180deg,rgba(168,85,247,.08),transparent); border:1px solid rgba(168,85,247,.28);">
+            <p style="margin:0 0 18px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px; color:#A855F7;">{{ m.num }}</p>
+            <h3 style="margin:0 0 10px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:30px; line-height:1; text-transform:uppercase; color:#fff;">{{ m.name }}</h3>
+            <p style="margin:0; font-size:14px; line-height:1.55; color:#a1a1aa;">{{ m.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div data-fade style="margin-top:36px;">
+        <a href="tel:+14319965455" style="display:inline-flex; align-items:center; gap:12px; padding:16px 28px; background:#A855F7; color:#0a0a0c; text-decoration:none;" style-hover="background:#C084FC;">
+          <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase;">Book mobile service</span>
+          <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px;">431-996-5455</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FREE QUOTE FORM ===== -->
+  <section id="quote" data-screen-label="Free quote" data-qmarker style="position:relative; max-width:1200px; margin:16vh auto; padding:60px clamp(24px,4vw,54px); background:rgba(9,9,12,.72); backdrop-filter:blur(18px) saturate(1.15); -webkit-backdrop-filter:blur(18px) saturate(1.15); border:1px solid rgba(255,255,255,.08); border-radius:6px; box-shadow:0 40px 110px -55px rgba(0,0,0,.95);">
+    <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; flex-wrap:wrap;">
+      <div data-fade>
+        <p style="margin:0 0 14px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">[ No obligation ]</p>
+        <h2 data-split style="margin:0 0 22px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(40px,6vw,86px); line-height:.9; text-transform:uppercase; color:#fff;">Get a free quote</h2>
+        <p style="margin:0 0 32px; max-width:42ch; font-size:16px; line-height:1.6; color:#b8b8c0;">Tell us about your car and what you need. We'll get back to you with honest pricing — usually same day. Prefer to talk now?</p>
+        <a href="tel:+14319965455" style="display:inline-flex; align-items:center; gap:12px; text-decoration:none; color:#fff; border-bottom:2px solid #A855F7; padding-bottom:6px;">
+          <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#8b8b92;">Call the shop</span>
+          <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:38px; letter-spacing:.5px;">431-996-5455</span>
+        </a>
+      </div>
+
+      <div data-fade style="background:linear-gradient(180deg,#0e0e13,#08080b); border:1px solid rgba(255,255,255,.1); padding:34px;">
+        <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+          <form onSubmit="{{ onSubmit }}" style="display:flex; flex-direction:column; gap:18px;">
+            <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+              <label style="display:flex; flex-direction:column; gap:8px;">
+                <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8b8b92;">Name</span>
+                <input name="name" type="text" required placeholder="Your name" style="background:#08080b; border:1px solid rgba(255,255,255,.14); color:#fff; padding:14px 14px; font-family:'Barlow',sans-serif; font-size:15px; outline:none;" style-focus="border-color:#A855F7;">
+              </label>
+              <label style="display:flex; flex-direction:column; gap:8px;">
+                <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8b8b92;">Phone</span>
+                <input name="phone" type="tel" required placeholder="(431) 000-0000" style="background:#08080b; border:1px solid rgba(255,255,255,.14); color:#fff; padding:14px 14px; font-family:'Barlow',sans-serif; font-size:15px; outline:none;" style-focus="border-color:#A855F7;">
+              </label>
+            </div>
+            <label style="display:flex; flex-direction:column; gap:8px;">
+              <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8b8b92;">Vehicle</span>
+              <input name="vehicle" type="text" placeholder="Year · Make · Model" style="background:#08080b; border:1px solid rgba(255,255,255,.14); color:#fff; padding:14px 14px; font-family:'Barlow',sans-serif; font-size:15px; outline:none;" style-focus="border-color:#A855F7;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:8px;">
+              <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8b8b92;">Service</span>
+              <select name="service" style="background:#08080b; border:1px solid rgba(255,255,255,.14); color:#fff; padding:14px 14px; font-family:'Barlow',sans-serif; font-size:15px; outline:none;" style-focus="border-color:#A855F7;">
+                <option value="">Select a service…</option>
+                <sc-for list="{{ serviceOptions }}" as="opt" hint-placeholder-count="8">
+                  <option value="{{ opt }}">{{ opt }}</option>
+                </sc-for>
+              </select>
+            </label>
+            <label style="display:flex; flex-direction:column; gap:8px;">
+              <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8b8b92;">Details</span>
+              <textarea name="message" rows="3" placeholder="What does it need?" style="background:#08080b; border:1px solid rgba(255,255,255,.14); color:#fff; padding:14px 14px; font-family:'Barlow',sans-serif; font-size:15px; outline:none; resize:vertical;" style-focus="border-color:#A855F7;"></textarea>
+            </label>
+            <button type="submit" style="margin-top:4px; padding:17px; background:#A855F7; color:#0a0a0c; border:none; cursor:pointer; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px; letter-spacing:.5px; text-transform:uppercase;" style-hover="background:#C084FC;">Get my free quote</button>
+            <p style="margin:0; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:1px; color:#5b5b66; text-align:center;">No spam. We only use this to quote your job.</p>
+          </form>
+        </sc-if>
+        <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:30px 10px;">
+            <div style="width:54px; height:54px; margin:0 auto 22px; border:2px solid #A855F7; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#A855F7; font-size:26px;">✓</div>
+            <h3 style="margin:0 0 12px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:34px; text-transform:uppercase; color:#fff;">Thanks, {{ customerName }}!</h3>
+            <p style="margin:0 0 28px; font-size:16px; line-height:1.6; color:#b8b8c0;">Your request is in. We'll call you back with a quote — usually the same day. Want it sorted faster?</p>
+            <a href="tel:+14319965455" style="display:inline-flex; align-items:center; gap:12px; padding:16px 28px; background:#A855F7; color:#0a0a0c; text-decoration:none;" style-hover="background:#C084FC;">
+              <span style="font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase;">Call now</span>
+              <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:26px;">431-996-5455</span>
+            </a>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LOCATION & HOURS ===== -->
+  <section id="visit" data-screen-label="Location" style="position:relative; max-width:1200px; margin:16vh auto; overflow:hidden; border:1px solid rgba(255,255,255,.08); border-radius:6px; background:rgba(9,9,12,.72); backdrop-filter:blur(18px) saturate(1.15); -webkit-backdrop-filter:blur(18px) saturate(1.15); box-shadow:0 40px 110px -55px rgba(0,0,0,.95);">
+    <div data-col2 style="display:grid; grid-template-columns:1fr 1fr; align-items:stretch; flex-wrap:wrap;">
+      <div data-fade style="padding:100px clamp(32px,6vw,90px);">
+        <p style="margin:0 0 14px; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; color:#C084FC;">[ Pull up ]</p>
+        <h2 data-split style="margin:0 0 40px; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:clamp(40px,5.5vw,80px); line-height:.9; text-transform:uppercase; color:#fff;">Find the shop</h2>
+
+        <div style="display:flex; flex-direction:column; gap:30px; max-width:420px;">
+          <div>
+            <p style="margin:0 0 6px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#71717a;">Address</p>
+            <p style="margin:0; font-size:20px; color:#f4f4f5;">1595 Erin Street<br>Winnipeg, MB</p>
+          </div>
+          <div>
+            <p style="margin:0 0 6px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#71717a;">Hours</p>
+            <p style="margin:0; font-size:20px; color:#f4f4f5;">Open 7 days · 8:00 AM – 6:00 PM</p>
+            <p style="margin:8px 0 0; font-size:14px; color:#A855F7; font-family:'Space Mono',monospace; letter-spacing:1px;">WALK-INS WELCOME</p>
+          </div>
+          <a href="tel:+14319965455" style="display:inline-flex; align-self:flex-start; align-items:center; gap:14px; padding:18px 30px; background:#A855F7; color:#0a0a0c; text-decoration:none; box-shadow:0 0 40px rgba(168,85,247,.4);" style-hover="background:#C084FC;">
+            <span style="width:10px; height:10px; border-radius:50%; background:#0a0a0c; animation:pulse 1.5s infinite;"></span>
+            <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:32px; letter-spacing:.5px;">431-996-5455</span>
+          </a>
+        </div>
+      </div>
+
+      <div style="position:relative; min-height:460px; border-left:1px solid rgba(255,255,255,.08); background:#0a0a0e;">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2571.0!2d-97.1700!3d49.8850!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x52ea73bb8a3b0e35%3A0x7e4b2b7a2e2b2b2b!2s1595%20Erin%20St%2C%20Winnipeg%2C%20MB%20R3E%202T3!5e0!3m2!1sen!2sca!4v1700000000000!5m2!1sen!2sca"
+          style="position:absolute; inset:0; width:100%; height:100%; border:0; filter:invert(90%) hue-rotate(180deg) brightness(0.85) contrast(0.9);"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="WHIP4 location — 1595 Erin Street, Winnipeg MB">
+        </iframe>
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg,rgba(5,5,7,.08),rgba(5,5,7,.32)); pointer-events:none;"></div>
+        <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-100%); display:flex; flex-direction:column; align-items:center; pointer-events:none; z-index:2;">
+          <div style="padding:7px 14px; background:#A855F7; color:#0a0a0c; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:16px; letter-spacing:.5px; white-space:nowrap;">WHIP4</div>
+          <div style="width:2px; height:18px; background:#A855F7;"></div>
+          <div style="width:12px; height:12px; border-radius:50%; background:#A855F7; box-shadow:0 0 18px #A855F7; margin-top:-2px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer style="position:relative; max-width:1200px; margin:16vh auto 24px; background:rgba(8,8,11,.8); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:48px clamp(24px,4vw,54px) 32px;">
+    <div style="max-width:1340px; margin:0 auto; display:flex; flex-wrap:wrap; gap:40px; justify-content:space-between; align-items:flex-start;">
+      <div style="max-width:340px;">
+        <span style="position:relative; display:inline-block; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-style:italic; font-size:40px; line-height:.8; letter-spacing:-1px;">
+          <span style="color:#fff;">WHIP</span><span style="color:#A855F7;">4</span>
+          <span style="position:absolute; left:-9px; right:12px; bottom:-4px; height:4px; background:linear-gradient(90deg,transparent,#7C3AED 45%,#C084FC); border-radius:2px;"></span>
+        </span>
+        <p style="margin:22px 0 0; font-size:15px; line-height:1.6; color:#8b8b92;">Driven by passion, delivered with care. Premium exhaust &amp; complete auto care in Winnipeg.</p>
+      </div>
+      <div style="display:flex; gap:56px; flex-wrap:wrap;">
+        <div>
+          <p style="margin:0 0 12px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#52525b;">Visit</p>
+          <p style="margin:0; font-size:15px; line-height:1.7; color:#d4d4d8;">1595 Erin Street<br>Winnipeg, MB<br>Open 7 days · 8AM–6PM</p>
+        </div>
+        <div>
+          <p style="margin:0 0 12px; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#52525b;">Call</p>
+          <a href="tel:+14319965455" style="text-decoration:none; color:#fff; font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:30px; letter-spacing:.5px;">431-996-5455</a>
+          <p style="margin:14px 0 0;"><a href="#quote" style="color:#C084FC; text-decoration:none; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:1px;">Get a free quote →</a></p>
+        </div>
+      </div>
+    </div>
+    <div style="max-width:1340px; margin:40px auto 0; padding-top:24px; border-top:1px solid rgba(255,255,255,.08); display:flex; flex-wrap:wrap; gap:10px; justify-content:space-between; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:1px; color:#52525b;">
+      <span>© 2026 WHIP4 EXHAUST + AUTO CARE</span>
+      <span>ONE STOP. COMPLETE CAR CARE.</span>
+    </div>
+  </footer>
+  </div><!-- /data-below -->
+
+  <!-- ===== STICKY MOBILE CALL BAR ===== -->
+  <div data-mobilebar style="position:fixed; left:0; right:0; bottom:0; z-index:120; display:none; gap:0; box-shadow:0 -8px 30px rgba(0,0,0,.5);">
+    <a href="#quote" style="flex:1; display:flex; align-items:center; justify-content:center; padding:16px; background:#15151b; color:#fff; text-decoration:none; font-family:'Space Mono',monospace; font-size:12px; letter-spacing:2px; text-transform:uppercase;">Free quote</a>
+    <a href="tel:+14319965455" style="flex:1.6; display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; background:#A855F7; color:#0a0a0c; text-decoration:none;">
+      <span style="width:8px; height:8px; border-radius:50%; background:#0a0a0c; animation:pulse 1.5s infinite;"></span>
+      <span style="font-family:'Barlow Condensed',sans-serif; font-weight:800; font-size:22px;">431-996-5455</span>
+    </a>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { submitted: false, customerName: "" };
+  _activeBeat = -2;
+  captionData = [
+    { from: 20,  to: 70,  kicker: "[ 01 ] Detailing & Ceramic", title: "Mirror-gloss, locked in", desc: "Paint correction and multi-year ceramic coating that keeps the whole car shining." },
+    { from: 144, to: 205, kicker: "[ 02 ] Custom Exhaust", title: "Built to breathe", desc: "Cat-back, axle-back and full custom builds tuned for flow, power and tone." },
+    { from: 206, to: 235, kicker: "[ 03 ] Tires, Wheels & Alignment", title: "Planted and precise", desc: "Seasonal swaps, mount, balance, TPMS and dead-straight alignments." },
+    { from: 236, to: 300, kicker: "[ 04 ] Suspension & Brakes", title: "Stance and stopping power", desc: "Coilovers, lowering kits and big-brake upgrades that actually stop." },
+    { from: 301, to: 347, kicker: "[ 05 ] Oil, Battery & Diagnostics", title: "One stop, done right", desc: "Full-synthetic oil, battery swaps and honest diagnostics \u2014 most jobs same day." },
+    { from: 350, to: 384, kicker: "[ 06 ] Interior Detailing", title: "Like the day you got it", desc: "Deep interior detail that resets every surface, seat and screen." },
+  ];
+
+  renderVals() {
+    return {
+      rootRef: (el) => { this.root = el; },
+      captions: this.captionData,
+      submitted: this.state.submitted,
+      notSubmitted: !this.state.submitted,
+      customerName: this.state.customerName || "there",
+      onSubmit: (e) => {
+        e.preventDefault();
+        let name = "";
+        try { name = (e.target.elements.name.value || "").trim().split(/\s+/)[0]; } catch (err) {}
+        this.setState({ submitted: true, customerName: name });
+        try { window.scrollTo({ top: window.scrollY }); } catch (err) {}
+      },
+      services: [
+        { num: "01", name: "Custom Exhaust", desc: "Cat-back, axle-back and full custom builds tuned for flow and tone." },
+        { num: "02", name: "Suspension & Alignment", desc: "Coilovers, lowering kits and precision alignments dialed in right." },
+        { num: "03", name: "Brakes", desc: "Pads, rotors and big-brake upgrades that actually stop." },
+        { num: "04", name: "Oil Changes", desc: "Full synthetic with a multi-point check — in and out fast." },
+        { num: "05", name: "Battery Replacement", desc: "Tested, swapped and recycled. Most done same day." },
+        { num: "06", name: "Tire Swap", desc: "Seasonal swaps, mount, balance and TPMS reset." },
+        { num: "07", name: "Auto Detailing", desc: "Interior and exterior detail that resets your whole car." },
+        { num: "08", name: "Ceramic Coating", desc: "Multi-year gloss and protection, professionally applied." },
+      ],
+      mobileServices: [
+        { num: "M1", name: "Doorstep Tire Swap", desc: "We bring the tools to your driveway and swap your seasonals." },
+        { num: "M2", name: "Doorstep Battery Swap", desc: "Dead battery? We test and replace it wherever you're parked." },
+        { num: "M3", name: "Pickup & Drop-off", desc: "We grab your car, do the work, and bring it back to you." },
+      ],
+      serviceOptions: [
+        "Custom Exhaust", "Suspension & Alignment", "Brakes", "Oil Change",
+        "Battery Replacement", "Tire Swap", "Auto Detailing", "Ceramic Coating",
+        "Mobile / Doorstep Service", "Something else",
+      ],
+    };
+  }
+
+  componentDidMount() {
+    const root = this.root;
+    if (!root) return;
+    this._cleanup = [];
+    this.startHero3D(root);
+    this.setupReveals(root);
+    this.startTilt(root);
+    this.startHeader(root);
+    this.startLenis();
+    this.startTicker();
+  }
+
+  componentWillUnmount() {
+    (this._cleanup || []).forEach((fn) => { try { fn(); } catch (e) {} });
+    if (this._lenis) { try { this._lenis.destroy(); } catch (e) {} }
+  }
+
+  // ---------- Full-site live 3D hero (scroll-scrubbed camera through a real GLTF model) ----------
+  startHero3D(root) {
+    const canvas = root.querySelector("[data-three-hero]");
+    const heroSection = root.querySelector("[data-hero]");
+    const reelSection = root.querySelector("#services");
+    const overlay = root.querySelector("[data-hero-overlay]");
+    const cue = root.querySelector("[data-cue]");
+    const loader = root.querySelector("[data-hero-loader]");
+    const loaderText = root.querySelector("[data-hero-loader-text]");
+    const beats = Array.from(root.querySelectorAll("[data-beat]"));
+    if (!canvas || !heroSection) return;
+
+    const caps = this.captionData || [];
+    // same asset-override convention the old frame system used, so a deploy pipeline
+    // can swap the model URL without touching this file
+    const MODEL_URL = (window.__resources && window.__resources.porscheModel) || "./porsche-911.glb";
+
+    // progress 0..1 from top of page through the end of the services reel (unchanged math)
+    this._scrubProgress = () => {
+      const y = window.scrollY || window.pageYOffset || 0;
+      const target = reelSection || heroSection;
+      const absTop = target.getBoundingClientRect().top + y;
+      const end = absTop + target.offsetHeight - window.innerHeight;
+      return end <= 0 ? 0 : Math.min(1, Math.max(0, y / end));
+    };
+    const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+    // kept identical to the old frame-scrub range so captions still fire at the same scroll points
+    const START_IDX = 12, END_IDX = 383;
+
+    let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let renderer = null, scene = null, camera = null, carGroup = null;
+    let posCurve = null, lookCurve = null, ready = false, curP = 0;
+
+    let pointerX = 0, pointerY = 0;
+    const onPointerMove = (e) => {
+      pointerX = (e.clientX / window.innerWidth - 0.5);
+      pointerY = (e.clientY / window.innerHeight - 0.5);
+    };
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+    const resize = () => {
+      const r = canvas.getBoundingClientRect();
+      W = r.width; H = r.height;
+      if (renderer) renderer.setSize(W, H, false);
+      if (camera) { camera.aspect = W / Math.max(1, H); camera.updateProjectionMatrix(); }
+    };
+    window.addEventListener("resize", resize);
+
+    const boot = () => {
+      const T = window.__Hero3D.THREE;
+
+      renderer = new T.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+      renderer.setPixelRatio(dpr);
+      renderer.toneMapping = T.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.outputColorSpace = T.SRGBColorSpace;
+
+      scene = new T.Scene();
+      scene.background = new T.Color(0x050507);
+      scene.fog = new T.FogExp2(0x050507, 0.045);
+
+      camera = new T.PerspectiveCamera(32, 1, 0.1, 100);
+      resize();
+
+      // studio-style environment for believable paint/glass reflections, no external HDR needed
+      const pmrem = new T.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromScene(new window.__Hero3D.RoomEnvironment(), 0.04).texture;
+
+      const key = new T.DirectionalLight(0xffffff, 2.6);
+      key.position.set(4, 5, 3);
+      scene.add(key);
+      const rim = new T.DirectionalLight(0xA855F7, 3.2); // brand purple rim light
+      rim.position.set(-4, 2, -3);
+      scene.add(rim);
+      scene.add(new T.HemisphereLight(0x3a2a55, 0x0a0a0d, 0.6));
+
+      // soft contact shadow disc under the car (cheap — no real-time shadow maps)
+      const shadowTex = (() => {
+        const c = document.createElement("canvas"); c.width = c.height = 256;
+        const g = c.getContext("2d");
+        const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+        grad.addColorStop(0, "rgba(0,0,0,.55)");
+        grad.addColorStop(1, "rgba(0,0,0,0)");
+        g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+        return new T.CanvasTexture(c);
+      })();
+      const shadowMesh = new T.Mesh(
+        new T.PlaneGeometry(6, 6),
+        new T.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
+      );
+      shadowMesh.rotation.x = -Math.PI / 2;
+      shadowMesh.position.y = -0.02;
+      scene.add(shadowMesh);
+
+      // camera "beats": hero shot, then one dolly stop per service caption — smoothly
+      // splined so scrolling feels like one continuous cinematic move, not a cut
+      const beatsCam = [
+        { pos: [0.4, 1.05, 6.4], look: [0, 0.35, 0] },          // hero establishing shot
+        { pos: [2.9, 0.55, 1.9], look: [0.6, 0.4, 0.1] },       // 01 Detailing & Ceramic
+        { pos: [-2.7, 0.32, 1.7], look: [-2.1, 0.24, 0] },      // 02 Custom Exhaust
+        { pos: [1.75, 0.28, 1.35], look: [1.85, 0.15, 0.85] },  // 03 Tires, Wheels & Alignment
+        { pos: [0.1, 0.16, 3.15], look: [0, 0.22, 0] },         // 04 Suspension & Brakes
+        { pos: [-1.9, 1.05, 1.55], look: [-2.05, 0.4, 0] },     // 05 Oil, Battery & Diagnostics
+        { pos: [0.35, 0.95, 0.95], look: [0.35, 0.5, 0] },      // 06 Interior Detailing
+      ];
+      posCurve = new T.CatmullRomCurve3(beatsCam.map((b) => new T.Vector3(...b.pos)));
+      lookCurve = new T.CatmullRomCurve3(beatsCam.map((b) => new T.Vector3(...b.look)));
+
+      const gltfLoader = new window.__Hero3D.GLTFLoader();
+      gltfLoader.setMeshoptDecoder(window.__Hero3D.MeshoptDecoder);
+      gltfLoader.load(
+        MODEL_URL,
+        (gltf) => {
+          const box = new T.Box3().setFromObject(gltf.scene);
+          const center = box.getCenter(new T.Vector3());
+          const size = box.getSize(new T.Vector3());
+          const scale = 2.6 / Math.max(size.x, size.z); // normalize footprint regardless of source model units
+          gltf.scene.position.set(-center.x, -box.min.y, -center.z);
+          const group = new T.Group();
+          group.add(gltf.scene);
+          group.scale.setScalar(scale);
+          scene.add(group);
+          carGroup = group;
+
+          gltf.scene.traverse((n) => {
+            if (n.isMesh && n.material) {
+              (Array.isArray(n.material) ? n.material : [n.material]).forEach((m) => {
+                if ("envMapIntensity" in m) m.envMapIntensity = 1.15;
+              });
+            }
+          });
+
+          ready = true;
+          if (loader) {
+            loader.style.opacity = "0";
+            setTimeout(() => { loader.style.display = "none"; }, 700);
+          }
+        },
+        (evt) => {
+          if (loaderText && evt.total) {
+            loaderText.textContent = "LOADING 3D MODEL — " + Math.min(100, Math.round((evt.loaded / evt.total) * 100)) + "%";
+          }
+        },
+        (err) => {
+          if (loaderText) loaderText.textContent = "COULD NOT LOAD 3D MODEL";
+          console.error("WHIP4 hero model failed to load:", err);
+        }
+      );
+    };
+
+    if (window.__Hero3D) boot();
+    else window.addEventListener("hero3dready", boot, { once: true });
+
+    this._renderCanvas = (now) => {
+      const p = this._scrubProgress();
+      curP += (p - curP) * 0.16; // light smoothing so fast scrolling never feels like a jump-cut
+
+      const idx = START_IDX + Math.round(curP * (END_IDX - START_IDX));
+      const f = idx + 1;
+      for (let k = 0; k < beats.length; k++) {
+        const c = caps[k]; if (!c) continue;
+        const on = f >= c.from && f <= c.to;
+        const b = beats[k];
+        if (on) { b.style.opacity = "1"; b.style.transform = "translateY(0)"; }
+        else { b.style.opacity = "0"; b.style.transform = "translateY(22px)"; }
+      }
+
+      const hp = smooth(0, window.innerHeight * 0.8, window.scrollY || 0);
+      if (overlay) overlay.style.opacity = String(1 - hp);
+      if (cue) cue.style.opacity = String(1 - smooth(0, 80, window.scrollY || 0));
+
+      if (!ready || !renderer) return;
+      const pos = posCurve.getPoint(curP);
+      const look = lookCurve.getPoint(curP);
+      camera.position.set(pos.x + pointerX * 0.35, pos.y + pointerY * 0.15, pos.z);
+      camera.lookAt(look.x + pointerX * 0.12, look.y, look.z);
+      if (carGroup) carGroup.rotation.y = Math.sin((now || 0) * 0.00012) * 0.025; // faint idle life, not a spin
+      renderer.render(scene, camera);
+    };
+
+    this._cleanup.push(() => {
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("hero3dready", boot);
+      if (renderer) renderer.dispose();
+    });
+  }
+
+  // ---------- Scroll reveals (ticker-tweened) ----------
+  setupReveals(root) {
+    this._reveals = [];
+    this._tweens = [];
+
+    root.querySelectorAll("[data-split]").forEach((el) => {
+      const words = el.textContent.split(/(\s+)/);
+      el.textContent = "";
+      const inners = [];
+      let wi = 0;
+      words.forEach((w) => {
+        if (w.trim() === "") { el.appendChild(document.createTextNode(w)); return; }
+        const word = document.createElement("span");
+        word.className = "split-word";
+        const inner = document.createElement("span");
+        inner.className = "split-inner";
+        inner.textContent = w;
+        inner.style.transform = "translateY(115%)";
+        word.appendChild(inner);
+        el.appendChild(word);
+        inners.push({ node: inner, delay: wi * 50 });
+        wi++;
+      });
+      this._reveals.push({ el, go: () => inners.forEach((it) => this._tweens.push({ kind: "split", node: it.node, start: -1, delay: it.delay, dur: 850 })) });
+    });
+
+    root.querySelectorAll("[data-fade]").forEach((el) => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(26px)";
+      this._reveals.push({ el, go: () => this._tweens.push({ kind: "fade", node: el, start: -1, delay: 0, dur: 750 }) });
+    });
+
+    const check = () => {
+      const vh = window.innerHeight || 800;
+      for (let i = this._reveals.length - 1; i >= 0; i--) {
+        const r = this._reveals[i].el.getBoundingClientRect();
+        if (r.top < vh * 0.9 && r.bottom > -60) { this._reveals[i].go(); this._reveals.splice(i, 1); }
+      }
+    };
+    this._checkReveals = check;
+
+    const ease = (p) => 1 - Math.pow(1 - p, 4);
+    this._updateTweens = (now) => {
+      const tws = this._tweens;
+      if (!tws || !tws.length) return;
+      for (let i = tws.length - 1; i >= 0; i--) {
+        const tw = tws[i];
+        if (tw.start < 0) tw.start = now + tw.delay;
+        const p = Math.min(1, Math.max(0, (now - tw.start) / tw.dur));
+        const e = ease(p);
+        if (tw.kind === "split") {
+          tw.node.style.transform = "translateY(" + ((1 - e) * 115) + "%)";
+        } else {
+          tw.node.style.opacity = String(e);
+          tw.node.style.transform = "translateY(" + ((1 - e) * 26) + "px)";
+        }
+        if (p >= 1) tws.splice(i, 1);
+      }
+    };
+
+    check();
+    setTimeout(check, 80);
+    setTimeout(check, 450);
+    window.addEventListener("scroll", check, { passive: true });
+    this._cleanup.push(() => window.removeEventListener("scroll", check));
+  }
+
+  startLenis() {
+    if (!window.Lenis) return;
+    try {
+      const lenis = new window.Lenis({ duration: 1.1, smoothWheel: true });
+      this._lenis = lenis;
+      if (this._checkReveals) lenis.on("scroll", this._checkReveals);
+    } catch (e) {}
+  }
+
+  startTicker() {
+    let ticked = false, useInterval = false, rafId = 0, intId = 0;
+    const tick = (timeMs) => {
+      ticked = true;
+      if (this._lenis) { try { this._lenis.raf(timeMs); } catch (e) {} }
+      if (this._updateTweens) { try { this._updateTweens(timeMs); } catch (e) {} }
+      if (this._renderCanvas) { try { this._renderCanvas(timeMs); } catch (e) {} }
+      if (this._checkReveals) { try { this._checkReveals(); } catch (e) {} }
+    };
+    const loop = (t) => { tick(t); if (!useInterval) rafId = requestAnimationFrame(loop); };
+    rafId = requestAnimationFrame(loop);
+    setTimeout(() => {
+      if (!ticked) { useInterval = true; intId = setInterval(() => tick(performance.now()), 1000 / 60); }
+    }, 250);
+    this._cleanup.push(() => { cancelAnimationFrame(rafId); if (intId) clearInterval(intId); });
+  }
+
+  startHeader(root) {
+    const header = root.querySelector("[data-header]");
+    const onScroll = () => {
+      const y = window.scrollY || window.pageYOffset;
+      if (y > 40) {
+        header.style.background = "rgba(5,5,7,.85)";
+        header.style.backdropFilter = "blur(14px)";
+        header.style.borderBottomColor = "rgba(255,255,255,.1)";
+        header.style.padding = "10px 32px";
+      } else {
+        header.style.background = "rgba(5,5,7,0)";
+        header.style.backdropFilter = "none";
+        header.style.borderBottomColor = "rgba(255,255,255,0)";
+        header.style.padding = "16px 32px";
+      }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    this._cleanup.push(() => window.removeEventListener("scroll", onScroll));
+  }
+
+  startTilt(root) {
+    root.querySelectorAll("[data-tilt]").forEach((card) => {
+      const glow = card.querySelector("[data-tilt-glow]");
+      const onMove = (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        const rx = (0.5 - py) * 11;
+        const ry = (px - 0.5) * 13;
+        card.style.transform = "perspective(900px) rotateX(" + rx + "deg) rotateY(" + ry + "deg) translateZ(6px)";
+        card.style.borderColor = "rgba(168,85,247,.55)";
+        card.style.boxShadow = "0 30px 60px -30px rgba(168,85,247,.5)";
+        if (glow) { glow.style.opacity = "1"; glow.style.setProperty("--mx", (px*100)+"%"); glow.style.setProperty("--my", (py*100)+"%"); }
+      };
+      const onLeave = () => {
+        card.style.transform = "perspective(900px) rotateX(0) rotateY(0)";
+        card.style.borderColor = "rgba(255,255,255,.1)";
+        card.style.boxShadow = "none";
+        if (glow) glow.style.opacity = "0";
+      };
+      card.style.transition = "transform .15s ease-out, border-color .3s, box-shadow .3s";
+      card.addEventListener("mousemove", onMove);
+      card.addEventListener("mouseleave", onLeave);
+      this._cleanup.push(() => { card.removeEventListener("mousemove", onMove); card.removeEventListener("mouseleave", onLeave); });
+    });
+  }
+}
+</script>
+</body>
+</html>
